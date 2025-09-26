@@ -47,6 +47,28 @@ export default function AdminPanel() {
   const [approvingUser, setApprovingUser] = useState<UserRecord | null>(null)
   const [approvalQRCode, setApprovalQRCode] = useState<string>('')
 
+  // Notification modal state
+  const [notification, setNotification] = useState<{
+    show: boolean
+    type: 'success' | 'error' | 'warning'
+    message: string
+  }>({
+    show: false,
+    type: 'success',
+    message: ''
+  })
+
+  // Confirm modal state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    show: boolean
+    message: string
+    onConfirm: () => void
+  }>({
+    show: false,
+    message: '',
+    onConfirm: () => {}
+  })
+
   // User form state
   const [userForm, setUserForm] = useState({
     name: '',
@@ -66,6 +88,19 @@ export default function AdminPanel() {
     monthlyBreakfastLimit: 22,
     monthlyLunchLimit: 22
   })
+
+  // Show notification function
+  const showNotification = (type: 'success' | 'error' | 'warning', message: string) => {
+    setNotification({ show: true, type, message })
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }))
+    }, 4000) // Auto hide after 4 seconds
+  }
+
+  // Show confirm function
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setConfirmDialog({ show: true, message, onConfirm })
+  }
 
   // Load dashboard data
   const loadDashboardData = async () => {
@@ -115,22 +150,22 @@ export default function AdminPanel() {
 
       const result = await response.json()
       if (result.success) {
-        alert(result.message)
+        showNotification('success', result.message)
         setShowUserModal(false)
         setEditingUser(null)
         setUserForm({ name: '', email: '', department: '', role: 'personel', password: '' })
         loadUsersData()
       } else {
-        alert(result.message)
+        showNotification('error', result.message)
       }
     } catch (error) {
-      alert('Hata oluştu')
+      showNotification('error', 'Hata oluştu')
     }
   }
 
   // Delete user
   const handleDeleteUser = async (userId: string) => {
-    if (confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+    showConfirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?', async () => {
       try {
         const response = await fetch('/api/admin', {
           method: 'POST',
@@ -143,15 +178,15 @@ export default function AdminPanel() {
 
         const result = await response.json()
         if (result.success) {
-          alert(result.message)
+          showNotification('success', result.message)
           loadUsersData()
         } else {
-          alert(result.message)
+          showNotification('error', result.message)
         }
       } catch (error) {
-        alert('Hata oluştu')
+        showNotification('error', 'Hata oluştu')
       }
-    }
+    })
   }
 
   // Load system settings
@@ -182,12 +217,12 @@ export default function AdminPanel() {
 
       const result = await response.json()
       if (result.success) {
-        alert('Ayarlar başarıyla kaydedildi!')
+        showNotification('success', 'Ayarlar başarıyla kaydedildi!')
       } else {
-        alert(result.message || 'Ayarlar kaydedilemedi')
+        showNotification('error', result.message || 'Ayarlar kaydedilemedi')
       }
     } catch (error) {
-      alert('Hata oluştu')
+      showNotification('error', 'Hata oluştu')
     } finally {
       setIsLoading(false)
     }
@@ -208,12 +243,12 @@ export default function AdminPanel() {
 
       const result = await response.json()
       if (result.success) {
-        alert('Tüm kullanıcı kredileri başarıyla yenilendi!')
+        showNotification('success', 'Tüm kullanıcı kredileri başarıyla yenilendi!')
       } else {
-        alert(result.message || 'Krediler yenilenemedi')
+        showNotification('error', result.message || 'Krediler yenilenemedi')
       }
     } catch (error) {
-      alert('Hata oluştu')
+      showNotification('error', 'Hata oluştu')
     } finally {
       setIsLoading(false)
     }
@@ -792,6 +827,73 @@ export default function AdminPanel() {
               >
                 Kapat
               </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Notification Modal */}
+      {notification.show && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          className="fixed top-4 right-4 z-50"
+        >
+          <div className={`max-w-md p-4 rounded-lg shadow-lg text-white ${
+            notification.type === 'success' ? 'bg-green-600' :
+            notification.type === 'error' ? 'bg-red-600' : 'bg-yellow-600'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="mr-2">
+                  {notification.type === 'success' ? '✅' : 
+                   notification.type === 'error' ? '❌' : '⚠️'}
+                </span>
+                <span>{notification.message}</span>
+              </div>
+              <button
+                onClick={() => setNotification(prev => ({ ...prev, show: false }))}
+                className="ml-4 text-white hover:text-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Confirm Modal */}
+      {confirmDialog.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl p-6 w-full max-w-md mx-4"
+          >
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <span className="text-red-600 text-xl">⚠️</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Emin misiniz?</h3>
+              <p className="text-gray-600 mb-6">{confirmDialog.message}</p>
+              <div className="flex space-x-3 justify-center">
+                <button
+                  onClick={() => setConfirmDialog(prev => ({ ...prev, show: false }))}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={() => {
+                    confirmDialog.onConfirm()
+                    setConfirmDialog(prev => ({ ...prev, show: false }))
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Sil
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
