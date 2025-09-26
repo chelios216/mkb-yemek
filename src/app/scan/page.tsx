@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks'
 import { getDeviceInfo, generateDeviceFingerprint } from '@/lib/types'
 import Logo from '@/components/Logo'
+import QrScanner from 'qr-scanner'
 
 interface QRScanResult {
   success: boolean
@@ -35,9 +36,12 @@ export default function QRScanPage() {
   const [testQRData, setTestQRData] = useState('')
   const [deviceInfo, setDeviceInfo] = useState<any>(null)
   const [location, setLocation] = useState<any>(null)
+  const [cameraError, setCameraError] = useState<string | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const qrScannerRef = useRef<QrScanner | null>(null)
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -104,6 +108,16 @@ export default function QRScanPage() {
     return () => clearInterval(timer)
   }, [])
 
+  // Cleanup QR scanner on unmount
+  useEffect(() => {
+    return () => {
+      if (qrScannerRef.current) {
+        qrScannerRef.current.stop()
+        qrScannerRef.current.destroy()
+      }
+    }
+  }, [])
+
   const validateQRCode = async (qrData: string) => {
     setIsProcessing(true)
     setScanResult(null)
@@ -144,40 +158,45 @@ export default function QRScanPage() {
 
   const startCamera = async () => {
     try {
-      // Check if getUserMedia is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Bu tarayıcı kamera erişimini desteklemiyor')
-      }
-
-      // Request camera permission with better mobile support
-      const constraints = {
-        video: {
-          facingMode: 'environment', // Use back camera on mobile
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      setCameraError(null)
+      setDebugLogs(prev => [...prev, 'QR Scanner başlatılıyor...'])
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        
-        // Wait for video to load
-        await new Promise((resolve) => {
-          if (videoRef.current) {
-            videoRef.current.onloadedmetadata = () => resolve(true)
-            videoRef.current.load()
-          }
-        })
-        
-        setIsScanning(true)
-        setScanResult(null)
+      if (!videoRef.current) {
+        throw new Error('Video element bulunamadı')
       }
+
+      setDebugLogs(prev => [...prev, 'QR Scanner oluşturuluyor...'])
+
+      // Create QR Scanner instance
+      qrScannerRef.current = new QrScanner(
+        videoRef.current,
+        (result) => {
+          setDebugLogs(prev => [...prev, `QR Kod okundu: ${result.data.substring(0, 50)}...`])
+          validateQRCode(result.data)
+        },
+        {
+          onDecodeError: (error) => {
+            // Don't log every decode error, it's normal when no QR is in view
+          },
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+          maxScansPerSecond: 5,
+          preferredCamera: 'environment' // Use back camera on mobile
+        }
+      )
+
+      setDebugLogs(prev => [...prev, 'QR Scanner başlatılıyor...'])
+      await qrScannerRef.current.start()
+      
+      setDebugLogs(prev => [...prev, 'QR Scanner başarıyla başlatıldı'])
+      setIsScanning(true)
+      setScanResult(null)
+      
     } catch (error: any) {
-      console.error('Kamera erişimi hatası:', error)
-      let errorMessage = 'Kamera erişimi için izin gerekli'
+      console.error('QR Scanner hatası:', error)
+      let errorMessage = 'QR okuyucu başlatılamadı'
+      
+      setDebugLogs(prev => [...prev, `HATA: ${error.name || 'Unknown'} - ${error.message}`])
       
       if (error.name === 'NotAllowedError') {
         errorMessage = 'Kamera izni reddedildi. Lütfen tarayıcı ayarlarından kamera erişimine izin verin.'
@@ -186,17 +205,20 @@ export default function QRScanPage() {
       } else if (error.name === 'NotSupportedError' || error.name === 'NotReadableError') {
         errorMessage = 'Kamera kullanımda veya erişilemiyor. Diğer uygulamaları kapatıp tekrar deneyin.'
       } else if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-        errorMessage = 'Kamera erişimi için HTTPS bağlantısı gerekli.'
+        errorMessage = 'QR okuma için HTTPS bağlantısı gerekli.'
       }
       
-      alert(errorMessage)
+      setCameraError(errorMessage)
+      setDebugLogs(prev => [...prev, `Hata mesajı: ${errorMessage}`])
     }
   }
 
   const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-      tracks.forEach(track => track.stop())
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop()
+      qrScannerRef.current.destroy()
+      qrScannerRef.current = null
+      setDebugLogs(prev => [...prev, 'QR Scanner durduruldu'])
     }
     setIsScanning(false)
   }
@@ -391,6 +413,41 @@ export default function QRScanPage() {
                 )}
               </div>
 
+              {/* Error Display */}
+              {cameraError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg"
+                >
+                  <div className="flex items-center">
+                    <span className="text-red-600 text-lg mr-2">❌</span>
+                    <div>
+                      <h4 className="text-red-800 font-semibold">Kamera Hatası</h4>
+                      <p className="text-red-700 text-sm mt-1">{cameraError}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Debug Logs */}
+              {debugLogs.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg max-h-48 overflow-y-auto"
+                >
+                  <h4 className="text-gray-800 font-semibold mb-2">Debug Bilgileri:</h4>
+                  <div className="space-y-1">
+                    {debugLogs.map((log, index) => (
+                      <p key={index} className="text-xs text-gray-600 font-mono">
+                        [{new Date().toLocaleTimeString()}] {log}
+                      </p>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
               {/* Camera Controls */}
               <div className="flex justify-center space-x-4">
                 {!isScanning ? (
@@ -406,6 +463,16 @@ export default function QRScanPage() {
                     className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
                   >
                     ⏹️ Kamerayı Durdur
+                  </button>
+                )}
+                
+                {/* Clear Debug Logs Button */}
+                {debugLogs.length > 0 && (
+                  <button
+                    onClick={() => setDebugLogs([])}
+                    className="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                  >
+                    🗑️ Logları Temizle
                   </button>
                 )}
               </div>
