@@ -249,7 +249,7 @@ export default function QRScanPage() {
   const currentMealType = getCurrentMealType()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <motion.header 
         initial={{ y: -50, opacity: 0 }}
@@ -545,7 +545,7 @@ export default function QRScanPage() {
         </div>
 
         {/* Bottom Navigation */}
-        <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-lg">
+        <footer className="sticky bottom-0 bg-white shadow-lg">
           <div className="flex justify-around border-t border-gray-200 py-2">
             <Link 
               href="/"
