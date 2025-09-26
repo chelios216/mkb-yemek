@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks'
+import { getDeviceInfo, generateDeviceFingerprint, MealRecord } from '@/lib/types'
 import Logo from '@/components/Logo'
+import Link from 'next/link'
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [mounted, setMounted] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mealHistory, setMealHistory] = useState<MealRecord[]>([])
+  const [currentMeal, setCurrentMeal] = useState<any>(null)
+  const [loadingHistory, setLoadingHistory] = useState(false)
   const router = useRouter()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
 
@@ -23,293 +27,277 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [])
 
+  // Load meal history and current meal when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user && mounted) {
+      loadMealData()
+    }
+  }, [isAuthenticated, user, mounted])
+
+  const loadMealData = async () => {
+    setLoadingHistory(true)
+    try {
+      const deviceInfo = await getDeviceInfo()
+      const fingerprint = generateDeviceFingerprint(deviceInfo)
+
+      // Get meal history
+      const historyResponse = await fetch(`/api/meal-history?fingerprint=${fingerprint}&limit=5`)
+      const historyData = await historyResponse.json()
+
+      if (historyData.success) {
+        setMealHistory(historyData.data.meals)
+      }
+
+      // Get current meal info
+      const mealResponse = await fetch(`/api/meals?fingerprint=${fingerprint}`)
+      const mealData = await mealResponse.json()
+
+      if (mealData.success) {
+        setCurrentMeal(mealData)
+      }
+
+    } catch (error) {
+      console.error('Meal data loading error:', error)
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('tr-TR', {
       hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+      minute: '2-digit'
     })
   }
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('tr-TR', {
       weekday: 'long',
-      year: 'numeric',
+      day: 'numeric',
       month: 'long',
-      day: 'numeric'
+      year: 'numeric'
     })
   }
 
-  const handleLogout = async () => {
-    await logout()
-    setSidebarOpen(false)
-    window.location.reload()
+  const getCurrentMealInfo = () => {
+    const hour = currentTime.getHours()
+    if (hour >= 7 && hour < 11) {
+      return {
+        name: 'Kahvaltı',
+        time: '08:00 - 09:00',
+        icon: '🍳',
+        type: 'kahvalti'
+      }
+    } else if (hour >= 11 && hour < 15) {
+      return {
+        name: 'Öğle Yemeği', 
+        time: '12:00 - 13:00',
+        icon: '🍽️',
+        type: 'ogle'
+      }
+    }
+    return {
+      name: 'Yemek Saatleri Dışında',
+      time: 'Kahvaltı: 08:00-09:00 | Öğle: 12:00-13:00',
+      icon: '⏰',
+      type: null
+    }
+  }
+
+  const currentMealInfo = getCurrentMealInfo()
+
+  // Show loading while checking authentication
+  if (isLoading || !mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Yükleniyor...</p>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    router.push('/login')
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900">
-      {/* Sidebar Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <motion.div
-        initial={{ x: -280 }}
-        animate={{ x: sidebarOpen ? 0 : -280 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed left-0 top-0 h-full w-70 bg-white dark:bg-slate-800 shadow-lg z-50 lg:translate-x-0 lg:static lg:w-64"
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <motion.header 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex items-center justify-between p-4 pb-2 bg-white shadow-sm"
       >
-        <div className="flex flex-col h-full">
-          {/* Sidebar Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <Logo size="sm" />
-              <div>
-                <div className="text-sm font-bold text-gray-800 dark:text-white leading-tight">
-                  MALKAN KANAAT
-                </div>
-                <div className="text-sm font-bold text-gray-800 dark:text-white">
-                  Yemek
-                </div>
-              </div>
-            </div>
-            
-            {/* User info in sidebar */}
-            {!isLoading && isAuthenticated && user && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-                <div className="flex flex-col gap-1">
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Hoş geldiniz
-                  </p>
-                  <p className="font-medium text-gray-800 dark:text-white text-sm">
-                    {user.name}
-                  </p>
-                  {user.role === 'admin' && (
-                    <p className="text-xs text-blue-600 dark:text-blue-400">
-                      Yönetici
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar Menu */}
-          {isAuthenticated && user && (
-            <nav className="flex-1 p-4">
-              <div className="space-y-2">
-                {/* QR Kod Okut */}
-                <motion.button
-                  onClick={() => {
-                    router.push('/scan')
-                    setSidebarOpen(false)
-                  }}
-                  className="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-3"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>QR Kod Okut</span>
-                </motion.button>
-
-                {/* Aylık Çizelge */}
-                <motion.button
-                  onClick={() => {
-                    router.push('/schedule')
-                    setSidebarOpen(false)
-                  }}
-                  className="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-3"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>Aylık Çizelge</span>
-                </motion.button>
-
-                {/* Admin Paneli - Only for admins */}
-                {user.role === 'admin' && (
-                  <motion.button
-                    onClick={() => {
-                      router.push('/admin')
-                      setSidebarOpen(false)
-                    }}
-                    className="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-3"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <span>Admin Paneli</span>
-                  </motion.button>
-                )}
-              </div>
-            </nav>
-          )}
-
-          {/* Logout Button - At bottom */}
-          {!isLoading && isAuthenticated && (
-            <div className="p-4 border-t border-gray-200 dark:border-slate-700">
-              <motion.button
-                onClick={handleLogout}
-                className="w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-3"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span>Çıkış Yap</span>
-              </motion.button>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="lg:ml-64">
-        {/* Mobile Menu Button */}
-        {isAuthenticated && (
-          <div className="lg:hidden fixed top-4 left-4 z-30">
-            <motion.button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </motion.button>
-          </div>
-        )}
-
-        {/* Header */}
-        <motion.header 
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="container mx-auto px-4 py-8"
+        <button 
+          onClick={() => {/* Menu functionality can be added later */}}
+          className="text-gray-800"
         >
-          {/* Centered Logo and Title */}
-          <div className="flex flex-col items-center gap-3">
-            <Logo size="lg" />
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white leading-tight">
-                MALKAN KANAAT
-              </h1>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Yemek
-              </h2>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <h1 className="flex-1 text-center text-lg font-bold text-gray-800 pr-6">
+          Kahvaltı/Yemek Takibi
+        </h1>
+      </motion.header>
+
+      <main className="p-4 space-y-6">
+        {/* Current Meal Section */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h2 className="text-xl font-bold text-gray-800 mb-3">Mevcut Öğün</h2>
+          <div className="relative w-full h-48 rounded-xl overflow-hidden bg-gradient-to-br from-green-600 to-green-700 shadow-lg">
+            <div className="absolute inset-0 bg-black/20"></div>
+            <div className="absolute bottom-0 left-0 p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">{currentMealInfo.icon}</span>
+                <h3 className="text-white text-2xl font-bold">{currentMealInfo.name}</h3>
+              </div>
+              <p className="text-white/90 font-medium">{currentMealInfo.time}</p>
+              {mounted && (
+                <p className="text-white/80 text-sm mt-1">
+                  Şu an: {formatTime(currentTime)}
+                </p>
+              )}
             </div>
           </div>
-        </motion.header>
+        </motion.div>
 
-        {/* Main Content */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center mb-12">
-            {/* Time Display */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-8"
-            >
-              <div className="text-6xl font-bold text-gray-800 dark:text-white mb-2 font-mono">
-                {mounted ? formatTime(currentTime) : '00:00:00'}
-              </div>
-              <div className="text-xl text-slate-600 dark:text-slate-300">
-                {mounted ? formatDate(currentTime) : 'Yükleniyor...'}
-              </div>
-            </motion.div>
+        {/* QR Code Button */}
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          onClick={() => router.push('/scan')}
+          className="w-full h-12 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-base transition-colors shadow-lg"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>QR Okut</span>
+        </motion.button>
 
-            {/* Welcome Text */}
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mb-12"
-            >
-              <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-                QR kod ile kolay ve güvenli yemek dağıtımı
-              </p>
-            </motion.div>
-
-            {/* Action Buttons */}
-            <motion.div
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-            >
-              {/* Authenticated User Buttons */}
-              {isAuthenticated && user ? (
-                <>
-                  {/* QR Scan Button - Only for authenticated users */}
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => router.push('/scan')}
-                    className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 min-w-[200px]"
-                  >
-                    <div className="flex items-center justify-center gap-3">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      <span>QR Kod Okut</span>
+        {/* Meal History */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h2 className="text-xl font-bold text-gray-800 mb-3">Yemek Geçmişim</h2>
+          
+          {loadingHistory ? (
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="animate-pulse bg-white p-3 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                     </div>
-                    <div className="absolute inset-0 rounded-2xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                  </motion.button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : mealHistory.length > 0 ? (
+            <div className="space-y-2">
+              {mealHistory.map((meal, index) => (
+                <motion.div
+                  key={meal.id}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="flex items-center gap-4 bg-white p-3 rounded-lg shadow-sm"
+                >
+                  <div className="flex items-center justify-center rounded-lg bg-green-50 shrink-0 w-12 h-12 text-green-600">
+                    <span className="text-2xl">
+                      {meal.mealType === 'kahvalti' ? '🍳' : '🍽️'}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-800 font-medium">
+                      {meal.mealType === 'kahvalti' ? 'Kahvaltı' : 'Öğle Yemeği'}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      {meal.mealType === 'kahvalti' ? '08:00 - 09:00' : '12:00 - 13:00'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-800 text-sm font-medium">
+                      {new Date(meal.timestamp).toLocaleDateString('tr-TR')}
+                    </p>
+                    <p className="text-gray-600 text-xs">
+                      {new Date(meal.timestamp).toLocaleDateString('tr-TR', { weekday: 'long' })}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4">🍽️</div>
+              <p className="text-gray-500">Henüz yemek kaydınız bulunmuyor</p>
+            </div>
+          )}
+        </motion.div>
+      </main>
 
-                  {/* Admin Panel Button - Only for admin users */}
-                  {user.role === 'admin' && (
-                    <motion.button
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => router.push('/admin')}
-                      className="group relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 min-w-[200px]"
-                    >
-                      <div className="flex items-center justify-center gap-3">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        <span>Admin Paneli</span>
-                      </div>
-                      <div className="absolute inset-0 rounded-2xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                    </motion.button>
-                  )}
-                </>
-              ) : (
-                /* Login Button - Only for non-authenticated users */
-                !isLoading && (
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => router.push('/login')}
-                    className="group relative bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 min-w-[200px]"
-                  >
-                    <div className="flex items-center justify-center gap-3">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                      </svg>
-                      <span>Personel Girişi</span>
-                    </div>
-                    <div className="absolute inset-0 rounded-2xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                  </motion.button>
-                )
-              )}
-            </motion.div>
-          </div>
+      {/* Bottom Navigation */}
+      <footer className="sticky bottom-0 bg-white shadow-lg">
+        <div className="flex justify-around border-t border-gray-200 py-2">
+          <button className="flex flex-col items-center justify-end gap-1 text-green-600 py-2">
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <p className="text-xs font-medium">Ana Sayfa</p>
+          </button>
+          
+          <Link 
+            href="/schedule"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs font-medium">Geçmiş</p>
+          </Link>
+          
+          {user?.role === 'admin' ? (
+            <Link 
+              href="/admin"
+              className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <p className="text-xs font-medium">Admin</p>
+            </Link>
+          ) : (
+            <button 
+              onClick={logout}
+              className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-red-600 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <p className="text-xs font-medium">Çıkış</p>
+            </button>
+          )}
         </div>
-      </div>
+      </footer>
     </div>
   )
 }
