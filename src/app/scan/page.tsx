@@ -52,6 +52,12 @@ export default function QRScanPage() {
       const info = getDeviceInfo()
       setDeviceInfo(info)
 
+      // Check for HTTPS requirement on mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      if (isMobile && window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        console.warn('HTTPS required for camera access on mobile devices')
+      }
+
       // Request location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -138,17 +144,52 @@ export default function QRScanPage() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      })
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Bu tarayıcı kamera erişimini desteklemiyor')
+      }
+
+      // Request camera permission with better mobile support
+      const constraints = {
+        video: {
+          facingMode: 'environment', // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+        
+        // Wait for video to load
+        await new Promise((resolve) => {
+          if (videoRef.current) {
+            videoRef.current.onloadedmetadata = () => resolve(true)
+            videoRef.current.load()
+          }
+        })
+        
         setIsScanning(true)
         setScanResult(null)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Kamera erişimi hatası:', error)
-      alert('Kamera erişimi için izin gerekli')
+      let errorMessage = 'Kamera erişimi için izin gerekli'
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = 'Kamera izni reddedildi. Lütfen tarayıcı ayarlarından kamera erişimine izin verin.'
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = 'Kamera bulunamadı. Cihazınızda kamera olduğundan emin olun.'
+      } else if (error.name === 'NotSupportedError' || error.name === 'NotReadableError') {
+        errorMessage = 'Kamera kullanımda veya erişilemiyor. Diğer uygulamaları kapatıp tekrar deneyin.'
+      } else if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        errorMessage = 'Kamera erişimi için HTTPS bağlantısı gerekli.'
+      }
+      
+      alert(errorMessage)
     }
   }
 
@@ -288,6 +329,26 @@ export default function QRScanPage() {
             </motion.div>
           )}
 
+          {/* HTTPS Warning for Mobile */}
+          {typeof window !== 'undefined' && 
+           window.location.protocol !== 'https:' && 
+           window.location.hostname !== 'localhost' &&
+           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6"
+            >
+              <div className="flex items-center text-yellow-800">
+                <span className="text-2xl mr-3">⚠️</span>
+                <div>
+                  <h3 className="font-semibold">HTTPS Gerekli</h3>
+                  <p className="text-sm">Mobil cihazlarda kamera erişimi için güvenli bağlantı (HTTPS) gereklidir.</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Camera Section */}
           <motion.div
             initial={{ y: 30, opacity: 0 }}
@@ -306,6 +367,9 @@ export default function QRScanPage() {
                     ref={videoRef}
                     autoPlay
                     playsInline
+                    muted
+                    controls={false}
+                    webkit-playsinline="true"
                     className="w-full h-full object-cover"
                   />
                 ) : (
