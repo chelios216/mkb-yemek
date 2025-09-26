@@ -2,6 +2,7 @@
 
 import { QRCodeSVG } from 'qrcode.react'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 export default function StaticQRPage() {
   const [qrContent, setQrContent] = useState('')
@@ -17,7 +18,7 @@ export default function StaticQRPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20">
       {/* Print styles */}
       <style jsx global>{`
         @media print {
@@ -117,6 +118,48 @@ export default function StaticQRPage() {
           </div>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-10">
+        <div className="flex justify-around py-2">
+          <Link 
+            href="/"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <p className="text-xs font-medium">Ana Sayfa</p>
+          </Link>
+          
+          <Link 
+            href="/scan"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <p className="text-xs font-medium">QR Okut</p>
+          </Link>
+          
+          <Link 
+            href="/schedule"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs font-medium">Geçmiş</p>
+          </Link>
+          
+          <button className="flex flex-col items-center justify-end gap-1 text-green-600 py-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <p className="text-xs font-medium">QR Print</p>
+          </button>
+        </div>
+      </footer>
     </div>
   )
 }

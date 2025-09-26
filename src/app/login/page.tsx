@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/hooks'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Logo from '@/components/Logo'
 
 export default function LoginPage() {
@@ -39,7 +40,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50 pb-20">
       <div className="flex items-center justify-center min-h-screen p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -179,6 +180,48 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Bottom Navigation */}
+      <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-10">
+        <div className="flex justify-around py-2">
+          <Link 
+            href="/"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <p className="text-xs font-medium">Ana Sayfa</p>
+          </Link>
+          
+          <Link 
+            href="/scan"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <p className="text-xs font-medium">QR Okut</p>
+          </Link>
+          
+          <Link 
+            href="/schedule"
+            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs font-medium">Geçmiş</p>
+          </Link>
+          
+          <button className="flex flex-col items-center justify-end gap-1 text-green-600 py-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <p className="text-xs font-medium">Giriş</p>
+          </button>
+        </div>
+      </footer>
     </div>
   )
 }
