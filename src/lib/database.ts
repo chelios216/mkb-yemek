@@ -684,8 +684,17 @@ class MockDatabase {
   }
 }
 
-// Singleton instance
-export const mockDb = new MockDatabase()
+// Global singleton instance to persist data across hot reloads in development
+declare global {
+  var __mockDb: MockDatabase | undefined
+}
+
+// Singleton instance - persists across hot reloads in development
+export const mockDb = globalThis.__mockDb || new MockDatabase()
+
+if (process.env.NODE_ENV === 'development') {
+  globalThis.__mockDb = mockDb
+}
 
 // Export specific methods for easier access
 export const getMonthlyMealCounts = (userId: string, year?: number, month?: number) => 
