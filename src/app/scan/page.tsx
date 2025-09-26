@@ -291,7 +291,7 @@ export default function QRScanPage() {
         </div>
       </motion.header>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 pb-20">
         <div className="max-w-2xl mx-auto">
           
           {/* Scan Result */}
@@ -533,15 +533,7 @@ export default function QRScanPage() {
             </motion.div>
           )}
 
-          {/* Navigation */}
-          <div className="text-center mb-20">
-            <Link 
-              href="/"
-              className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              ← Ana Sayfa
-            </Link>
-          </div>
+          {/* Navigation removed - using bottom navigation instead */}
         </div>
 
         {/* Bottom Navigation */}

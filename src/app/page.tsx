@@ -149,7 +149,7 @@ export default function Home() {
         </h1>
       </motion.header>
 
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-6 pb-20">
         {/* Current Meal Section */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
