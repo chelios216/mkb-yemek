@@ -561,14 +561,14 @@ export default function AdminPanel() {
                         type="time"
                         value={workSchedule.breakfastStart}
                         onChange={(e) => setWorkSchedule({ ...workSchedule, breakfastStart: e.target.value })}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                       />
-                      <span className="flex items-center">-</span>
+                      <span className="flex items-center text-gray-700">-</span>
                       <input
                         type="time"
                         value={workSchedule.breakfastEnd}
                         onChange={(e) => setWorkSchedule({ ...workSchedule, breakfastEnd: e.target.value })}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                       />
                     </div>
                   </div>
@@ -580,14 +580,14 @@ export default function AdminPanel() {
                         type="time"
                         value={workSchedule.lunchStart}
                         onChange={(e) => setWorkSchedule({ ...workSchedule, lunchStart: e.target.value })}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                       />
-                      <span className="flex items-center">-</span>
+                      <span className="flex items-center text-gray-700">-</span>
                       <input
                         type="time"
                         value={workSchedule.lunchEnd}
                         onChange={(e) => setWorkSchedule({ ...workSchedule, lunchEnd: e.target.value })}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                       />
                     </div>
                   </div>
@@ -606,7 +606,7 @@ export default function AdminPanel() {
                       max="31"
                       value={workSchedule.monthlyBreakfastLimit}
                       onChange={(e) => setWorkSchedule({ ...workSchedule, monthlyBreakfastLimit: parseInt(e.target.value) || 22 })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                     />
                   </div>
                   <div>
@@ -617,7 +617,7 @@ export default function AdminPanel() {
                       max="31"
                       value={workSchedule.monthlyLunchLimit}
                       onChange={(e) => setWorkSchedule({ ...workSchedule, monthlyLunchLimit: parseInt(e.target.value) || 22 })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                     />
                   </div>
                 </div>
