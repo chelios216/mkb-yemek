@@ -35,72 +35,12 @@ class MockDatabase {
       isApproved: true, // Admin daima onaylı
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01')
-    },
-    {
-      id: 'user-demo-personel',
-      name: 'Demo Personel',
-      department: 'Genel Müdürlük',
-      email: 'personel@mkb.com',
-      role: 'personel',
-      isActive: true,
-      isApproved: false, // Personel başlangıçta onaysız
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
-    },
-    {
-      id: 'user-001',
-      name: 'Ahmet Yılmaz',
-      department: 'IT Departmanı',
-      email: 'ahmet@mkb.com',
-      role: 'personel',
-      isActive: true,
-      isApproved: false,
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: 'user-002',
-      name: 'Ayşe Demir',
-      department: 'İnsan Kaynakları',
-      email: 'ayse@mkb.com',
-      role: 'personel',
-      isActive: true,
-      isApproved: false,
-      createdAt: new Date('2024-01-20'),
-      updatedAt: new Date('2024-01-20')
-    },
-    {
-      id: 'user-003',
-      name: 'Mehmet Kaya',
-      department: 'Muhasebe',
-      email: 'mehmet@mkb.com',
-      role: 'personel',
-      isActive: true,
-      isApproved: true, // Bu kullanıcı örnek olarak onaylı
-      createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-01')
-    },
-    {
-      id: 'user-test',
-      name: 'Test Personel',
-      department: 'Test Departmanı',
-      email: 'test@mkb.com',
-      role: 'personel',
-      isActive: true,
-      isApproved: false,
-      createdAt: new Date('2024-02-05'),
-      updatedAt: new Date('2024-02-05')
     }
   ]
 
-  // Şifreler (demo için basit - üretimde bcrypt hash'i olacak)
+  // Şifreler (production için güvenli bcrypt hash'i)
   private passwords: Record<string, string> = {
-    'admin@mkb.com': bcrypt.hashSync('admin123', 10),
-    'personel@mkb.com': bcrypt.hashSync('personel123', 10),
-    'test@mkb.com': bcrypt.hashSync('test123', 10),
-    'ahmet@mkb.com': bcrypt.hashSync('ahmet123', 10),
-    'ayse@mkb.com': bcrypt.hashSync('ayse123', 10),
-    'mehmet@mkb.com': bcrypt.hashSync('mehmet123', 10)
+    'admin@mkb.com': bcrypt.hashSync('admin123', 10)
   }
 
   private devices: DeviceRegistration[] = []
@@ -124,59 +64,7 @@ class MockDatabase {
     }
   ]
   
-  private mealRecords: MealRecord[] = [
-    // Test data for demo personel (this month)
-    {
-      id: 'meal-001',
-      userId: 'user-demo-personel',
-      mealType: 'kahvalti',
-      date: '2024-09-01',
-      timestamp: new Date('2024-09-01T08:00:00'),
-    },
-    {
-      id: 'meal-002',
-      userId: 'user-demo-personel',
-      mealType: 'ogle',
-      date: '2024-09-01',
-      timestamp: new Date('2024-09-01T12:30:00'),
-    },
-    {
-      id: 'meal-003',
-      userId: 'user-demo-personel',
-      mealType: 'kahvalti',
-      date: '2024-09-02',
-      timestamp: new Date('2024-09-02T08:15:00'),
-    },
-    {
-      id: 'meal-004',
-      userId: 'user-demo-personel',
-      mealType: 'ogle',
-      date: '2024-09-02',
-      timestamp: new Date('2024-09-02T12:45:00'),
-    },
-    {
-      id: 'meal-005',
-      userId: 'user-demo-personel',
-      mealType: 'kahvalti',
-      date: '2024-09-03',
-      timestamp: new Date('2024-09-03T07:45:00'),
-    },
-    // Add some records for other users too
-    {
-      id: 'meal-006',
-      userId: 'user-001',
-      mealType: 'kahvalti',
-      date: '2024-09-01',
-      timestamp: new Date('2024-09-01T08:10:00'),
-    },
-    {
-      id: 'meal-007',
-      userId: 'user-001',
-      mealType: 'ogle',
-      date: '2024-09-01',
-      timestamp: new Date('2024-09-01T12:20:00'),
-    }
-  ]
+  private mealRecords: MealRecord[] = []
   private settings: SystemSettings[] = [
     {
       id: 'settings-001',
