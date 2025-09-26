@@ -39,7 +39,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50">
       <div className="flex items-center justify-center min-h-screen p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -47,7 +47,7 @@ export default function LoginPage() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
             {/* Logo/Title */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -58,15 +58,15 @@ export default function LoginPage() {
               <div className="flex flex-col items-center gap-3 mb-4">
                 <Logo size="md" />
                 <div className="text-center">
-                  <h1 className="text-3xl font-bold text-slate-800 dark:text-white leading-tight">
+                  <h1 className="text-3xl font-bold text-gray-800 leading-tight">
                     MALKAN KANAAT
                   </h1>
-                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+                  <h2 className="text-2xl font-bold text-gray-800">
                     Yemek
                   </h2>
                 </div>
               </div>
-              <p className="text-slate-600 dark:text-slate-300">
+              <p className="text-gray-600">
                 Personel Girişi
               </p>
             </motion.div>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm"
+                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
                 >
                   {error}
                 </motion.div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
 
               {/* Email Input */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   E-posta Adresi
                 </label>
                 <input
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/50 text-gray-800 placeholder:text-gray-500 transition-colors"
                   placeholder="ornek@mkb.com"
                   required
                 />
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
               {/* Password Input */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Şifre
                 </label>
                 <div className="relative">
@@ -117,14 +117,14 @@ export default function LoginPage() {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 pr-12 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white transition-colors"
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/50 text-gray-800 placeholder:text-gray-500 transition-colors"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +146,7 @@ export default function LoginPage() {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading || !email.trim() || !password.trim()}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isLoading ? (
                   <>
