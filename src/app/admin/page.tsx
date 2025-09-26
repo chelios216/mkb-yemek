@@ -518,7 +518,7 @@ export default function AdminPanel() {
             <h2 className="text-xl font-bold text-gray-900">Sistem Ayarları</h2>
             
             <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-6">Çalışma Günleri ve Saatleri</h3>
+              <h3 className="text-lg font-semibold mb-6 text-gray-800">Çalışma Günleri ve Saatleri</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Çalışma Günleri */}
@@ -534,7 +534,7 @@ export default function AdminPanel() {
                       { value: 6, label: 'Cumartesi' },
                       { value: 0, label: 'Pazar' }
                     ].map(day => (
-                      <label key={day.value} className="flex items-center">
+                      <label key={day.value} className="flex items-center text-gray-700">
                         <input
                           type="checkbox"
                           checked={workSchedule.workDays.includes(day.value)}
@@ -677,7 +677,7 @@ export default function AdminPanel() {
                   type="text"
                   value={userForm.name}
                   onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                 />
               </div>
 
@@ -687,7 +687,7 @@ export default function AdminPanel() {
                   type="email"
                   value={userForm.email}
                   onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                 />
               </div>
 
@@ -697,7 +697,7 @@ export default function AdminPanel() {
                   type="text"
                   value={userForm.department}
                   onChange={(e) => setUserForm({ ...userForm, department: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                 />
               </div>
 
@@ -706,7 +706,7 @@ export default function AdminPanel() {
                 <select
                   value={userForm.role}
                   onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                 >
                   <option value="personel">Personel</option>
                   <option value="admin">Yönetici</option>
@@ -721,7 +721,7 @@ export default function AdminPanel() {
                   type="password"
                   value={userForm.password}
                   onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
                 />
               </div>
             </div>
