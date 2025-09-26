@@ -197,19 +197,19 @@ export default function QRScanPage() {
           <div className="flex items-center gap-4">
             <Logo size="md" />
             <div>
-              <h1 className="text-xl font-bold text-slate-800 leading-tight">
+              <h1 className="text-xl font-bold text-gray-800 leading-tight">
                 MALKAN KANAAT
               </h1>
-              <h2 className="text-lg font-bold text-slate-800">
+              <h2 className="text-lg font-bold text-gray-800">
                 Yemek
               </h2>
-              <p className="text-slate-600 text-sm">QR Kod Okuyucu</p>
+              <p className="text-gray-600 text-sm">QR Kod Okuyucu</p>
             </div>
           </div>
           
           <div className="text-right">
-            <div className="text-lg font-bold text-slate-800">{formatTime(currentDate)}</div>
-            <div className="text-sm text-slate-600">
+            <div className="text-lg font-bold text-gray-800">{formatTime(currentDate)}</div>
+            <div className="text-sm text-gray-600">
               {currentMealType ? (
                 <span className={`px-2 py-1 rounded-full text-xs ${
                   currentMealType === 'kahvalti' 

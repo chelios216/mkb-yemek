@@ -203,10 +203,10 @@ export default function Home() {
           <div className="flex flex-col items-center gap-3">
             <Logo size="lg" />
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-slate-800 dark:text-white leading-tight">
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white leading-tight">
                 MALKAN KANAAT
               </h1>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 Yemek
               </h2>
             </div>
@@ -223,7 +223,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mb-8"
             >
-              <div className="text-6xl font-bold text-slate-800 dark:text-white mb-2 font-mono">
+              <div className="text-6xl font-bold text-gray-800 dark:text-white mb-2 font-mono">
                 {mounted ? formatTime(currentTime) : '00:00:00'}
               </div>
               <div className="text-xl text-slate-600 dark:text-slate-300">

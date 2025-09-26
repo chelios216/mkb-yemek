@@ -283,8 +283,8 @@ export default function AdminPanel() {
           <div className="flex items-center gap-4">
             <Logo size="md" />
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">Admin Paneli</h1>
-              <p className="text-slate-600">Sistem yönetimi ve raporlar</p>
+              <h1 className="text-2xl font-bold text-gray-800">Admin Paneli</h1>
+              <p className="text-gray-600">Sistem yönetimi ve raporlar</p>
             </div>
           </div>
           
@@ -666,7 +666,7 @@ export default function AdminPanel() {
       {showUserModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
               {editingUser ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı'}
             </h3>
 
@@ -755,7 +755,7 @@ export default function AdminPanel() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
           >
-            <h3 className="text-lg font-semibold mb-4 text-center">
+            <h3 className="text-lg font-semibold mb-4 text-center text-gray-800">
               Kullanıcı Tanımlama
             </h3>
             
