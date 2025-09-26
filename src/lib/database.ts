@@ -72,7 +72,40 @@ class MockDatabase {
     'test2@mkb.com': bcrypt.hashSync('test123', 10)
   }
 
-  private devices: DeviceRegistration[] = []
+  private devices: DeviceRegistration[] = [
+    {
+      id: 'device-test1',
+      deviceFingerprint: 'test123',
+      userId: 'user-test1',
+      deviceInfo: {
+        userAgent: 'Test Browser',
+        platform: 'Test Platform',
+        language: 'tr-TR',
+        screenResolution: '1920x1080',
+        timezone: 'Europe/Istanbul',
+        cookiesEnabled: true
+      },
+      isActive: true,
+      registeredAt: new Date('2024-01-01'),
+      lastSeen: new Date()
+    },
+    {
+      id: 'device-test2',
+      deviceFingerprint: 'udshms',
+      userId: 'user-test2',
+      deviceInfo: {
+        userAgent: 'Test Browser 2',
+        platform: 'Test Platform 2',
+        language: 'tr-TR',
+        screenResolution: '1920x1080',
+        timezone: 'Europe/Istanbul',
+        cookiesEnabled: true
+      },
+      isActive: true,
+      registeredAt: new Date('2024-01-01'),
+      lastSeen: new Date()
+    }
+  ]
   
   // Sistem ayarları
   private systemSettings: SystemSettings[] = [
@@ -93,7 +126,48 @@ class MockDatabase {
     }
   ]
   
-  private mealRecords: MealRecord[] = []
+  private mealRecords: MealRecord[] = [
+    {
+      id: 'meal-001',
+      userId: 'user-test1',
+      mealType: 'kahvalti',
+      date: '2024-12-10',
+      timestamp: new Date('2024-12-10T08:30:00'),
+      deviceId: 'device-test1'
+    },
+    {
+      id: 'meal-002',
+      userId: 'user-test1',
+      mealType: 'ogle',
+      date: '2024-12-10',
+      timestamp: new Date('2024-12-10T12:30:00'),
+      deviceId: 'device-test1'
+    },
+    {
+      id: 'meal-003',
+      userId: 'user-test2',
+      mealType: 'kahvalti',
+      date: '2024-12-10',
+      timestamp: new Date('2024-12-10T08:45:00'),
+      deviceId: 'device-test2'
+    },
+    {
+      id: 'meal-004',
+      userId: 'user-test1',
+      mealType: 'kahvalti',
+      date: '2024-12-09',
+      timestamp: new Date('2024-12-09T08:15:00'),
+      deviceId: 'device-test1'
+    },
+    {
+      id: 'meal-005',
+      userId: 'user-test2',
+      mealType: 'ogle',
+      date: '2024-12-09',
+      timestamp: new Date('2024-12-09T13:00:00'),
+      deviceId: 'device-test2'
+    }
+  ]
   private settings: SystemSettings[] = [
     {
       id: 'settings-001',
@@ -248,14 +322,10 @@ class MockDatabase {
       id: uuidv4(),
       userId,
       deviceFingerprint: fingerprint,
-      deviceInfo: {
-        userAgent: deviceInfo.userAgent,
-        screenResolution: deviceInfo.screenResolution,
-        timezone: deviceInfo.timezone
-      },
+      deviceInfo: deviceInfo,
       isActive: true,
-      createdAt: new Date(),
-      lastUsed: new Date()
+      registeredAt: new Date(),
+      lastSeen: new Date()
     }
 
     this.devices.push(device)
@@ -265,7 +335,7 @@ class MockDatabase {
   async findDeviceByFingerprint(fingerprint: string): Promise<DeviceRegistration | null> {
     const device = this.devices.find(d => d.deviceFingerprint === fingerprint && d.isActive)
     if (device) {
-      device.lastUsed = new Date()
+      device.lastSeen = new Date()
     }
     return device || null
   }

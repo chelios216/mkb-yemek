@@ -30,14 +30,10 @@ export interface DeviceRegistration {
   id: string
   userId: string
   deviceFingerprint: string
-  deviceInfo: {
-    userAgent: string
-    screenResolution: string
-    timezone: string
-  }
+  deviceInfo: DeviceInfo
   isActive: boolean
-  createdAt: Date
-  lastUsed: Date
+  registeredAt: Date
+  lastSeen: Date
 }
 
 export interface MealRecord {
