@@ -537,8 +537,8 @@ export default function QRScanPage() {
         </div>
 
         {/* Bottom Navigation */}
-        <footer className="sticky bottom-0 bg-white shadow-lg">
-          <div className="flex justify-around border-t border-gray-200 py-2">
+        <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-10">
+          <div className="flex justify-around py-2">
             <Link 
               href="/"
               className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
