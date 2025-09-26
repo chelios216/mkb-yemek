@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/hooks'
 import Logo from '@/components/Logo'
 import { QRCodeSVG } from 'qrcode.react'
 
@@ -37,6 +38,11 @@ interface QRCodeData {
 }
 
 export default function AdminPanel() {
+  const router = useRouter()
+  const { logout } = useAuth()
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'settings'>('dashboard')
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [users, setUsers] = useState<UserRecord[]>([])
@@ -323,12 +329,15 @@ export default function AdminPanel() {
             </div>
           </div>
           
-          <Link 
-            href="/"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          <button 
+            onClick={() => setShowSettingsModal(true)}
+            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            Ana Sayfa
-          </Link>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
       </motion.header>
 
@@ -357,13 +366,12 @@ export default function AdminPanel() {
 
         {/* Sabit QR Kod Yazdırma Linki */}
         <div className="mb-6 text-center">
-          <Link
-            href="/qr-print"
-            target="_blank"
+          <button
+            onClick={() => window.open('/qr-print', '_blank')}
             className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-md"
           >
             🖨️ Sabit QR Kodu Yazdır
-          </Link>
+          </button>
           <p className="text-sm text-gray-600 mt-2">
             Bu QR kodu yazdırıp mutfağa yapıştırabilirsiniz
           </p>
@@ -902,25 +910,25 @@ export default function AdminPanel() {
       {/* Bottom Navigation */}
       <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-10">
         <div className="flex justify-around py-2">
-          <Link 
-            href="/"
+          <button 
+            onClick={() => router.push('/')}
             className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <p className="text-xs font-medium">Ana Sayfa</p>
-          </Link>
+          </button>
           
-          <Link 
-            href="/schedule"
+          <button 
+            onClick={() => router.push('/schedule')}
             className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-xs font-medium">Geçmiş</p>
-          </Link>
+          </button>
           
           <button className="flex flex-col items-center justify-end gap-1 text-green-600 py-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -930,6 +938,54 @@ export default function AdminPanel() {
           </button>
         </div>
       </footer>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettingsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowSettingsModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl p-6 w-full max-w-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Ayarlar</h3>
+              
+              {/* Notifications Toggle */}
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-gray-700">Bildirimler</span>
+                <button
+                  onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                  className={`relative inline-flex w-12 h-6 rounded-full transition-colors ${
+                    notificationsEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
+                      notificationsEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                    } translate-y-0.5`}
+                  />
+                </button>
+              </div>
+              
+              {/* Logout Button */}
+              <button
+                onClick={logout}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+              >
+                Çıkış Yap
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
