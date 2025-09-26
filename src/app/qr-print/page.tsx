@@ -133,16 +133,6 @@ export default function StaticQRPage() {
           </Link>
           
           <Link 
-            href="/scan"
-            className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <p className="text-xs font-medium">QR Okut</p>
-          </Link>
-          
-          <Link 
             href="/schedule"
             className="flex flex-col items-center justify-end gap-1 text-gray-600 py-2 hover:text-green-600 transition-colors"
           >
