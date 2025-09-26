@@ -55,7 +55,7 @@ export default function LoginPage() {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="text-center mb-8"
             >
-              <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="flex flex-col items-center gap-3 mb-4">
                 <Logo size="md" />
                 <div className="text-center">
                   <h1 className="text-3xl font-bold text-slate-800 dark:text-white leading-tight">
@@ -161,26 +161,6 @@ export default function LoginPage() {
                 )}
               </motion.button>
             </motion.form>
-
-            {/* Demo Info */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="mt-8 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg"
-            >
-              <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Demo Hesapları:
-              </h3>
-              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
-                <div>
-                  <strong>Admin:</strong> admin@mkb.com / admin123
-                </div>
-                <div>
-                  <strong>Personel:</strong> personel@mkb.com / personel123
-                </div>
-              </div>
-            </motion.div>
 
             {/* Back to Home */}
             <motion.div
