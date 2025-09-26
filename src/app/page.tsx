@@ -29,39 +29,39 @@ export default function Home() {
 
   // Load meal history and current meal when user is authenticated
   useEffect(() => {
+    const loadMealData = async () => {
+      setLoadingHistory(true)
+      try {
+        const deviceInfo = await getDeviceInfo()
+        const fingerprint = generateDeviceFingerprint(deviceInfo)
+
+        // Get meal history
+        const historyResponse = await fetch(`/api/meal-history?fingerprint=${fingerprint}&limit=5`)
+        const historyData = await historyResponse.json()
+
+        if (historyData.success) {
+          setMealHistory(historyData.data.meals)
+        }
+
+        // Get current meal info
+        const mealResponse = await fetch(`/api/meals?fingerprint=${fingerprint}`)
+        const mealData = await mealResponse.json()
+
+        if (mealData.success) {
+          setCurrentMeal(mealData)
+        }
+
+      } catch (error) {
+        console.error('Meal data loading error:', error)
+      } finally {
+        setLoadingHistory(false)
+      }
+    }
+
     if (isAuthenticated && user && mounted) {
       loadMealData()
     }
   }, [isAuthenticated, user, mounted])
-
-  const loadMealData = async () => {
-    setLoadingHistory(true)
-    try {
-      const deviceInfo = await getDeviceInfo()
-      const fingerprint = generateDeviceFingerprint(deviceInfo)
-
-      // Get meal history
-      const historyResponse = await fetch(`/api/meal-history?fingerprint=${fingerprint}&limit=5`)
-      const historyData = await historyResponse.json()
-
-      if (historyData.success) {
-        setMealHistory(historyData.data.meals)
-      }
-
-      // Get current meal info
-      const mealResponse = await fetch(`/api/meals?fingerprint=${fingerprint}`)
-      const mealData = await mealResponse.json()
-
-      if (mealData.success) {
-        setCurrentMeal(mealData)
-      }
-
-    } catch (error) {
-      console.error('Meal data loading error:', error)
-    } finally {
-      setLoadingHistory(false)
-    }
-  }
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('tr-TR', {
