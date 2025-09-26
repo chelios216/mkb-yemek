@@ -22,6 +22,11 @@ import {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 
+// Global type declaration for development persistence
+declare global {
+  var __mockDb: MockDatabase | undefined
+}
+
 // Mock Database - Gerçek uygulamada PostgreSQL kullanılacak
 class MockDatabase {
   private users: User[] = [
@@ -35,12 +40,36 @@ class MockDatabase {
       isApproved: true, // Admin daima onaylı
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01')
+    },
+    {
+      id: 'user-test1',
+      name: 'Test Kullanıcı 1',
+      department: 'Test Departmanı',
+      email: 'test1@mkb.com',
+      role: 'personel',
+      isActive: true,
+      isApproved: true,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01')
+    },
+    {
+      id: 'user-test2', 
+      name: 'Test Kullanıcı 2',
+      department: 'Test Departmanı',
+      email: 'test2@mkb.com',
+      role: 'personel',
+      isActive: true,
+      isApproved: true,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01')
     }
   ]
 
   // Şifreler (production için güvenli bcrypt hash'i)
   private passwords: Record<string, string> = {
-    'admin@mkb.com': bcrypt.hashSync('admin123', 10)
+    'admin@mkb.com': bcrypt.hashSync('admin123', 10),
+    'test1@mkb.com': bcrypt.hashSync('test123', 10),
+    'test2@mkb.com': bcrypt.hashSync('test123', 10)
   }
 
   private devices: DeviceRegistration[] = []
